@@ -1,11 +1,13 @@
 FLAGS = -std=c++17 -Wall -lm
 
+SRCS = src/dft2d.cpp
+
 run:
-	g++ $(FLAGS) main.cpp -o main.out
-	./main.out
+	g++ $(FLAGS) $(SRCS) -o run.out
+	./run.out
 
 clean:
-	rm -f main.out
+	rm -f run.out
 
 plot:
 	python3 plot.py
