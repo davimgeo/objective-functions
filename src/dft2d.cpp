@@ -1,4 +1,5 @@
 #include <cmath>
+#include <complex.h>
 
 #include "../include/IO.h"
 #include "../include/plot.h"
@@ -11,6 +12,8 @@ int main()
   int nrec = 113;
 
   float* seismogram = read2d_fortran(PATH, nt, nrec);
+
+  std::complex<float>* DFT;
 
   plot2d(seismogram, nrec, nt);
 

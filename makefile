@@ -1,6 +1,6 @@
 FLAGS = -std=c++17 -Wall -lm
 
-SRCS = src/dft2d.cpp
+SRCS = src/dft1d.cpp
 
 run:
 	g++ $(FLAGS) $(SRCS) -o run.out

@@ -91,6 +91,8 @@ int main()
   float dt = 2e-3;
   float fmax = 30.0f;
 
+  int* toninho = (int*)malloc(sizeof(int) * 4.0);
+
   float* wavelet = ricker(SIZE, dt, fmax);
 
   DFT d = computeDFT(SIZE, wavelet, dt);
