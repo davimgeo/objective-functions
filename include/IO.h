@@ -7,13 +7,28 @@
 static inline void write1d(const char* PATH, void* arr, size_t type, int size) 
 {
   FILE* bin_data = fopen(PATH, "wb"); 
-  if (bin_data == NULL) 
-  {
+  if (bin_data == NULL) {
     printf("Could not write binary file.\n");
     exit(-1);
   }
 
   fwrite(arr, type, size, bin_data); 
+
+  fclose(bin_data);   
+}
+
+static inline void write2d(
+    const char* PATH, void* arr, 
+    size_t type, int height, int width
+  ) 
+{
+  FILE* bin_data = fopen(PATH, "wb"); 
+  if (bin_data == NULL) {
+    printf("Could not write binary file.\n");
+    exit(-1);
+  }
+
+  fwrite(arr, type, height*width, bin_data); 
 
   fclose(bin_data);   
 }

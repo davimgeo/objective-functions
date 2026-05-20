@@ -1,27 +1,49 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-SIZE = 1001
+def load(PATH: str, height: int, width: int) -> np.ndarray:
+  return np.fromfile(
+    PATH, dtype=np.float32, count=height*width
+  ).reshape([height, width], order='C')
 
-recoved_ricker = np.fromfile("data/recovered_wavelet.bin", dtype=np.float32)
-ricker = np.fromfile("data/ricker.bin", dtype=np.float32)
-arr = np.fromfile("data/mag_ricker.bin", dtype=np.float32)
-freq = np.fromfile("data/freq.bin", dtype=np.float32)
+def plot_seismogram(
+    seismogram: np.ndarray, 
+    nt: int, dt: float, 
+    offset: int, 
+    nrec: int, 
+    perc=99
+) -> None:
+  
+  tloc = np.linspace(0, nt - 1, 11, dtype=int)
+  tlab = np.around(tloc * dt, decimals=1)
 
-fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(10, 8))
+  xloc = np.linspace(0, nrec - 1, 9)
+  xlab = np.array(offset * xloc, dtype=int)
 
-ax[0].plot(np.arange(SIZE) * 1e-3, ricker, label=f"dt={1e-3}, fmax=30hz")
-ax[0].legend()
+  scale_min = np.percentile(seismogram, 100 - perc)
+  scale_max = np.percentile(seismogram, perc)
 
-ax[1].plot(freq[:(SIZE // 2)], arr[:(SIZE // 2)])
+  fig, ax = plt.subplots(figsize=(10, 8))
 
-for axs in ax:
-  axs.grid(True)
+  img = ax.imshow(seismogram, aspect="auto", cmap="jet",
+                    vmin=scale_min, vmax=scale_max)
 
-plt.show()
+  ax.set_yticks(tloc)
+  ax.set_yticklabels(tlab)
 
-plt.plot(np.arange(SIZE) * 1e-3, ricker)
+  ax.set_xticks(xloc)
+  ax.set_xticklabels(xlab)
 
-plt.plot(np.arange(SIZE) * 1e-3, recoved_ricker)
+  ax.set_xlabel("Offset (m)", fontsize=13)
+  ax.set_ylabel("TWT (s)", fontsize=13)
 
-plt.show()
+  plt.show()
+
+
+nt, nrec = 4001, 113
+dt = 1e-3
+offset = 15
+
+seismogram_mag = load("data/seismogram_mag.bin", nt, nrec)
+
+plot_seismogram(seismogram_mag, nt, dt, offset, nrec)

@@ -1,9 +1,11 @@
-FLAGS = -std=c++17 -Wall -lm
+FLAGS = -std=c++17 -Wall
 
-SRCS = src/dft1d.cpp
+LIBS = -lfftw3f -lm
+
+SRCS = src/dft2d.cpp
 
 run:
-	g++ $(FLAGS) $(SRCS) -o run.out
+	g++ $(FLAGS) $(SRCS) -o run.out $(LIBS)
 	./run.out
 
 clean:
