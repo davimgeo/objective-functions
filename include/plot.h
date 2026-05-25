@@ -17,9 +17,11 @@ static inline void plot1d(
   FILE* gnuplot = popen("gnuplot -persistent", "w");
 
   if (!gnuplot) {
-    fprintf(stderr, "Could not start gnuplot!\n");
-    return;
+      fprintf(stderr, "Could not start gnuplot!\n");
+      return;
   }
+
+  fprintf(gnuplot, "set term qt size 1400,600\n");
 
   fprintf(gnuplot,
       "plot '-' binary "
@@ -28,15 +30,12 @@ static inline void plot1d(
       "with lines notitle\n",
       size);
 
-  fflush(gnuplot);
+  fwrite(arr, sizeof(float), size, gnuplot);
 
-  fwrite(arr,
-         sizeof(float),
-         (size_t)size,
-         gnuplot);
+  fprintf(gnuplot, "\n");
+  fprintf(gnuplot, "pause mouse close\n");
 
   fflush(gnuplot);
-
   pclose(gnuplot);
 }
 
@@ -52,6 +51,8 @@ static inline void plot1d_2(
     fprintf(stderr, "Could not start gnuplot!\n");
     return;
   }
+
+  fprintf(gnuplot, "set term qt size 1400,600\n");
 
   fprintf(gnuplot,
       "plot "
@@ -74,6 +75,10 @@ static inline void plot1d_2(
          (size_t)size,
          gnuplot);
 
+         
+  fprintf(gnuplot, "\n");
+  fprintf(gnuplot, "pause mouse close\n");
+         
   fflush(gnuplot);
 
   pclose(gnuplot);
@@ -123,9 +128,47 @@ static inline void plot2d(
          (size_t)width * height,
          gnuplot);
 
+         
+  fprintf(gnuplot, "\n");
+  fprintf(gnuplot, "pause mouse close\n");
+         
   fflush(gnuplot);
 
   pclose(gnuplot);
 }
 
+#include <complex>
+static inline void plot2d_imag(
+    const std::complex<float>* arr,
+    int width,
+    int height)
+{
+  float* imag = new float[width * height];
+
+  for (int i = 0; i < width * height; i++) {
+    imag[i] = arr[i].imag();
+  }
+
+  plot2d(imag, width, height);
+
+  delete[] imag;
+}
+
+static inline void plot2d_real(
+    const std::complex<float>* arr,
+    int width,
+    int height)
+{
+  float* real = new float[width * height];
+
+  for (int i = 0; i < width * height; i++) {
+    real[i] = arr[i].real();
+  }
+
+  plot2d(real, width, height);
+
+  delete[] real;
+}
+
 #endif /* PLOT_H */
+

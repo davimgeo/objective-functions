@@ -1,4 +1,4 @@
-FLAGS = -std=c++17 -Wall
+FLAGS = -std=c++11 -Wall
 
 LIBS = -lfftw3f -lm
 
