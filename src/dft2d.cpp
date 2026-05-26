@@ -76,22 +76,22 @@ float* computeIDFT(std::complex<float>* F, DFTOperator d, int M, int N)
 {
   // f = conj(Tz^T) * F * conj(Tx)
 
-  std::complex<float>* TzT_conj = conjugate2d(
+  std::complex<float>* conj_TzT = conjugate2d(
     transpose(d.Tz, M, M), M, M
   );
 
-  std::complex<float>* TzT_conj_F = 
-    mat_mult<std::complex<float>>(TzT_conj, F, M, M, M, N);
+  std::complex<float>* conj_TzT_F = 
+    mat_mult<std::complex<float>>(conj_TzT, F, M, M, M, N);
 
-  std::complex<float>* TZT_conf_F_Tx_conj =
+  std::complex<float>* conj_TzT_F_conj_Tx =
     mat_mult<std::complex<float>>(
-      TzT_conj_F, conjugate2d(d.Tx, N, N), M, N, N, N
+      conj_TzT_F, conjugate2d(d.Tx, N, N), M, N, N, N
     );
 
   auto* IDFT = new float[M * N];
 
   for (int i = 0; i < M * N; ++i) {
-    IDFT[i] = TZT_conf_F_Tx_conj[i].real();
+    IDFT[i] = conj_TzT_F_conj_Tx[i].real();
   }
 
   return IDFT;
@@ -117,7 +117,7 @@ int main()
 
   float* mag = magnitude(dft_seis, nt, nrec);
 
-  //plot2d(idft_seis, nrec, nt);
+  plot2d_imag(dft_seis, nrec, nt);
  
   write2d("data/seismogram_idft.bin", idft_seis, sizeof(float), nt, nrec);
   write2d("data/seismogram_mag.bin", mag, sizeof(float), nt, nrec);
