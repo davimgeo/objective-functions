@@ -46,7 +46,13 @@ offset = 15
 
 seismogram_mag = load("data/seismogram_mag.bin", nt, nrec)
 
-plt.imshow(seismogram_mag, cmap="jet", aspect="auto")
+plt.imshow(
+  seismogram_mag,
+  cmap="jet",
+  aspect="auto",
+)
+
+plt.colorbar()
 
 plt.tight_layout()
 plt.show()

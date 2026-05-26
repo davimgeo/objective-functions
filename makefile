@@ -1,4 +1,4 @@
-FLAGS = -std=c++11 -Wall
+FLAGS = -std=c++11 -Wall -fopenmp -mavx2 -mfma -O3 -march=native
 
 LIBS = -lfftw3f -lm
 
@@ -12,4 +12,6 @@ clean:
 	rm -f run.out
 
 plot:
+	$(MAKE) run
+
 	python3 plot.py

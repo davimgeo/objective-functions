@@ -1,8 +1,9 @@
-#include <fftw3.h>
 #include <cmath>
 #include <complex>
+#include <time.h>
 #include <assert.h>
 
+#include "../include/math_utils.h"
 #include "../include/IO.h"
 #include "../include/plot.h"
 
@@ -11,45 +12,6 @@ struct DFTOperator
   std::complex<float>* Tx;
   std::complex<float>* Tz;
 };
-
-template<typename R, typename TA, typename TB>
-R* mat_mult(
-  const TA* A, const TB* B,
-  int rowsA, int colsA, int rowsB, int colsB
-)
-{
-  assert(colsA == rowsB);
-
-  auto* result = new R[rowsA * colsB];
-
-  for (int i = 0; i < rowsA; i++) {
-    for (int j = 0; j < colsB; j++) {
-      R temp = R();
-
-      for (int k = 0; k < colsA; k++) {
-        temp += A[i * colsA + k] * B[k * colsB + j];
-      }
-
-      result[i * colsB + j] = temp;
-    }
-  }
-
-  return result;
-}
-
-template<typename R, typename TA>
-R* transpose(const TA* A, int rowsA, int colsA)
-{
-  auto* aT = new R[colsA * rowsA];
-
-  for (int i = 0; i < rowsA; i++) {
-    for (int j = 0; j < colsA; j++) {
-      aT[j * rowsA + i] = A[i * colsA + j];
-    }
-  }  
-
-  return aT;
-}
 
 DFTOperator dft_operator_2d(int M, int N)
 {
@@ -62,15 +24,17 @@ DFTOperator dft_operator_2d(int M, int N)
   d.Tx = new std::complex<float>[N*N];
   d.Tz = new std::complex<float>[M*M];
 
+  #pragma omp parallel for schedule(static)
   for (int i = 0; i < M; i++) {
     for (int j = 0; j < M; j++) {
       float angle = -2.0f * M_PI * ((float)(i * j) / (float)M);
 
-      d.Tz[i + j * M] =
+      d.Tz[i * M + j] =
         std::exp(std::complex<float>(0.0f, angle));
     }
   }
 
+  #pragma omp parallel for schedule(static)
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < N; j++) {
       float angle = -2.0f * M_PI * ((float)(i * j) / (float)N);
@@ -86,59 +50,59 @@ DFTOperator dft_operator_2d(int M, int N)
 std::complex<float>* computeDFT(int M, int N, float* f, DFTOperator d)
 {
   // DFT = Tz * f * Tx^T
-  // DFT = transpose(Tx * transpose(Tz * f))
-
-  /*
+  
   std::complex<float>* Tzf =
     mat_mult<std::complex<float>>(d.Tz, f, M, M, M, N);
 
   std::complex<float>* TxT =
-    transpose<std::complex<float>>(d.Tx, N, N);
+    transpose(d.Tx, N, N);
 
   std::complex<float>* DFT =
     mat_mult<std::complex<float>>(Tzf, TxT, M, N, N, N);
 
+  for (int i = 0; i < M; i++) {
+    for (int j = 0; j < N; j++) {
+      DFT[i * N + j] /= M*N;
+    }
+  }
+
   delete[] Tzf;
   delete[] TxT;
-  */
-  
-  std::complex<float>* Tzf =
-      mat_mult<std::complex<float>>(d.Tz, f, M, M, M, N);
-
-  std::complex<float>* TzfT =
-      transpose<std::complex<float>>(Tzf, M, N);
-
-  std::complex<float>* Tx_TzfT =
-      mat_mult<std::complex<float>>(d.Tx, TzfT, N, N, N, M);
-
-  std::complex<float>* DFT =
-      transpose<std::complex<float>>(Tx_TzfT, N, M);
-
-  delete[] Tzf;
-  delete[] TzfT;
-  delete[] Tx_TzfT;
-  
 
   return DFT;
 }
 
-float* magnitude(std::complex<float>* arr, int height, int width)
+float* computeIDFT(std::complex<float>* F, DFTOperator d, int M, int N)
 {
-  float* mag = new float[height * width];
+  // f = conj(Tz^T) * F * conj(Tx)
 
-  for(int i = 0; i < height; i++) {
-    for(int j = 0; j < width; j++) {
-      int idx = i + j * height;
+  std::complex<float>* TzT_conj = conjugate2d(
+    transpose(d.Tz, M, M), M, M
+  );
 
-      mag[idx] = arr[idx].real();
-    }
+  std::complex<float>* TzT_conj_F = 
+    mat_mult<std::complex<float>>(TzT_conj, F, M, M, M, N);
+
+  std::complex<float>* TZT_conf_F_Tx_conj =
+    mat_mult<std::complex<float>>(
+      TzT_conj_F, conjugate2d(d.Tx, N, N), M, N, N, N
+    );
+
+  auto* IDFT = new float[M * N];
+
+  for (int i = 0; i < M * N; ++i) {
+    IDFT[i] = TZT_conf_F_Tx_conj[i].real();
   }
 
-  return mag;
+  return IDFT;
 }
+
+struct timespec start, end;
 
 int main()
 {
+  clock_gettime(CLOCK_MONOTONIC, &start);
+
   const char* PATH = "data/seismogram_4001nt_113nrec.bin";
 
   int nt = 4001;
@@ -148,19 +112,28 @@ int main()
 
   DFTOperator T = dft_operator_2d(nt, nrec);
 
-  plot2d_imag(T.Tz, nt, nt);
-
   std::complex<float>* dft_seis = computeDFT(nt, nrec, seismogram, T);
+  float* idft_seis = computeIDFT(dft_seis, T, nt, nrec);
 
   float* mag = magnitude(dft_seis, nt, nrec);
 
-  plot2d(mag, nrec, nt);
+  //plot2d(idft_seis, nrec, nt);
  
+  write2d("data/seismogram_idft.bin", idft_seis, sizeof(float), nt, nrec);
   write2d("data/seismogram_mag.bin", mag, sizeof(float), nt, nrec);
 
   delete[] mag;
   delete[] dft_seis;
-  delete[] seismogram;
+  delete[] idft_seis;
+  free(seismogram);
+
+  // ********************************** //
+  clock_gettime(CLOCK_MONOTONIC, &end);
+
+  double elapsed = (end.tv_sec - start.tv_sec)
+                  + (end.tv_nsec - start.tv_nsec) / 1e9;
+
+  printf("Elapsed: %.4f seconds\n", elapsed);
 
   return 0;
 }
