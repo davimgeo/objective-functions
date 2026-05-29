@@ -37,52 +37,48 @@ static float* get_penalty(int nt, float t0)
 {
   float* P = new float[nt];
 
-  for (int tau = -nt/2; tau < nt/2; ++tau) {
+  for (int i = 0; i < nt; ++i) {
+    float tau = (i - (float)nt/2);
+
     if(std::abs(tau) <= t0) {
-      P[tau] = tau;
+      P[i] = tau;
     } else {
-      P[tau] = 0.0f;
+      P[i] = 0.0f;
     }
   }  
 
   return P;
 }
 
-static float l2_sqrt(float* A, int rows, int cols)
-{
-
-//  l2[i] = np.sum((d_obs - d_calc)**2)
-
-  float result = 0.0f;
-
-  for (int i = 0; i < rows; ++i) {
-    for (int j = 0; j < cols; ++j) {
-       result += A[i + cols + j]; 
-    }
-  }
-
-  return result;
-}
-
 float get_correlation_objf(
-  float *u_s, float *u_o,
-  float dt, float dk,
-  int nt, int nrec, float t0
+    float *u_s, float *u_o,
+    float dt, float dk,
+    int nt, int nrec,
+    float t0
 )
 {
+  /*
+   * H_cor = 0.5 * \sum_
+   */
   float result = 0.0f;
 
   float* c = get_c(u_s, u_o, dt, dk, nt, nrec);
   float* P = get_penalty(nt, t0);
 
-  for (int i = 0; i < nt; ++i)
-  {
-    float* p_c = mat_mult_scalar<float>(c, P[i], nt, nrec);
-      
-    result += l2_sqrt(p_c, nt, nrec);
+  for (int tau = 0; tau < nt; ++tau) {
 
-    delete[] p_c;
+    for (int x = 0; x < nrec; ++x) {
+
+      int idx = tau * nrec + x;
+
+      float pc = P[tau] * c[idx];
+
+      result += pc * pc;
+    }
   }
 
-  return result * 0.5f;
+  delete[] c;
+  delete[] P;
+
+  return 0.5f * result;
 }

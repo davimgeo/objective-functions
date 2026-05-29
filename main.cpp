@@ -28,7 +28,7 @@ int main()
   float dt = 1e-3;
   float dk = 5.0f;
 
-  float t0 = 0.5f;
+  float t0 = 500.0f;
 
   float* d_calc = read2d_fortran(PATH_CALC, nt, nrec);
   float* d_obs = read2d_fortran(PATH_OBS, nt, nrec);
