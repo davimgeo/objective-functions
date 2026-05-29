@@ -1,65 +1,46 @@
 #include <time.h>
 
-#include "include/math_utils.h"
 #include "include/IO.h"
-#include "include/dft2d.h"
+#include "include/objf.h"
 #include "include/plot.h"
 
-struct timespec start, end;
+#define PROFILE_BEGIN()                                   \
+    struct timespec start, end;                           \
+    clock_gettime(CLOCK_MONOTONIC, &start)                \
 
-#define PROFILE_BEGIN() \
-    clock_gettime(CLOCK_MONOTONIC, &start)
-
-#define PROFILE_END() do { \
-    clock_gettime(CLOCK_MONOTONIC, &end); \
-    double elapsed = (end.tv_sec - start.tv_sec) + \
+#define PROFILE_END() do {                                \
+    clock_gettime(CLOCK_MONOTONIC, &end);                 \
+    double elapsed = (end.tv_sec - start.tv_sec) +        \
                      (end.tv_nsec - start.tv_nsec) / 1e9; \
-    printf("Elapsed: %.4f seconds\n", elapsed); \
+    printf("Elapsed: %.4f seconds\n", elapsed);           \
 } while (0)
+
+#define PATH_CALC "data/d_calc/Seismogram_2001nt_40nrec.bin"
+#define PATH_OBS "data/d_obs/seismogram_2001nt_40nrec_((250, 120))shot_33.bin"
 
 int main()
 {
   PROFILE_BEGIN();
 
-  const char* PATH = "data/seismogram_4001nt_113nrec.bin";
-
-  int nt = 4001;
-  int nrec = 113;
+  int nt = 2001;
+  int nrec = 40;
 
   float dt = 1e-3;
-  float dk = 15.0f;
+  float dk = 5.0f;
 
-  float* seismogram = read2d_fortran(PATH, nt, nrec);
+  float t0 = 0.5f;
 
-  DFTOperator T = dft_operator_2d(dt, dk, nt, nrec);
+  float* d_calc = read2d_fortran(PATH_CALC, nt, nrec);
+  float* d_obs = read2d_fortran(PATH_OBS, nt, nrec);
 
-  std::complex<float>* dft_seis = computeDFT(nt, nrec, seismogram, T);
-  float* idft_seis = computeIDFT(dft_seis, T, nt, nrec);
+  float H_cor = get_correlation_objf(d_calc, d_obs, dt, dk, nt, nrec, t0);
 
-  write2d(
-    "data/seismogram_idft.bin",
-    idft_seis,
-    sizeof(float),
-    nt, nrec
-  );
-
-  write2d(
-    "data/seismogram_mag.bin", 
-    magnitude(dft_seis, nt, nrec),
-    sizeof(float),
-    nt, nrec
-  );
+  printf("H_cor: %f\n", H_cor);
 
   PROFILE_END();
 
-  //plot2d_imag(T.Tx, nrec, nrec);
-  plot2d(idft_seis, nrec, nt);
-
-  delete[] T.Tx;
-  delete[] T.Tz;
-  delete[] dft_seis;
-  delete[] idft_seis;
-  free(seismogram);
+  free(d_calc);
+  free(d_obs);
   
   return 0;
 }

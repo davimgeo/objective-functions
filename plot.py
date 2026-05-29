@@ -39,23 +39,14 @@ def plot_seismogram(
 
   plt.show()
 
-
-nt, nrec = 4001, 113
+nt, nrec = 2001, 40
 dt = 1e-3
-offset = 15
+offset = 5
 
-seismogram_mag = load("data/seismogram_mag.bin", nt, nrec)
+c = load("data/c_2001x40.bin", nt, nrec)
 
-plt.imshow(
-  seismogram_mag,
-  cmap="jet",
-  aspect="auto",
-)
-
-plt.colorbar()
-
-plt.tight_layout()
+plt.plot(c[10, :])
 plt.show()
 
-seismogram_idft = load("data/seismogram_idft.bin", nt, nrec)
-plot_seismogram(seismogram_idft, nt, dt, offset, nrec)
+plt.imshow(c, cmap="jet", aspect="auto")
+plt.show()

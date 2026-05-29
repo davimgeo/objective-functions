@@ -4,46 +4,8 @@
 #include "../include/math_utils.h"
 #include "../include/dft2d.h"
 
-DFTOperator dft_operator_2d(int M, int N)
-{
-  /* T = \sum_{m=0}^{M-1} 
-  \sum_{n=0}^{N-1} e^{-j2\pi( \frac{km/M} + \frac{ln}{N} )} 
-  */
-
-  struct DFTOperator d;
-
-  d.Tx = new std::complex<float>[N*N];
-  d.Tz = new std::complex<float>[M*M];
-
-  #pragma omp parallel for schedule(static)
-  for (int i = 0; i < M; i++) {
-    for (int j = 0; j < M; j++) {
-      float angle = -2.0f * M_PI * ((float)(i * j) / (float)M);
-
-      d.Tz[i * M + j] =
-        std::exp(std::complex<float>(0.0f, angle));
-    }
-  }
-
-  #pragma omp parallel for schedule(static)
-  for (int i = 0; i < N; i++) {
-    for (int j = 0; j < N; j++) {
-      float angle = -2.0f * M_PI * ((float)(i * j) / (float)N);
-
-      d.Tx[i * N + j] = 
-        std::exp(std::complex<float>(0.0f, angle));
-    }
-  }
-
-  return d;
-}
-
 DFTOperator dft_operator_2d(float dt, float dh, int M, int N)
 {
-  /* T = \sum_{m=0}^{M-1} 
-  \sum_{n=0}^{N-1} e^{-j2\pi( \f  float* freqs_z = (float*)malloc(sizeof(float) * nt);
-  */
-
   struct DFTOperator d;
 
   d.Tx = new std::complex<float>[N*N];
@@ -68,6 +30,79 @@ DFTOperator dft_operator_2d(float dt, float dh, int M, int N)
       float angle = -2.0f * M_PI * x*dk * n*dh;
 
       d.Tx[x * N + n] = 
+        std::exp(std::complex<float>(0.0f, angle));
+    }
+  }
+
+  return d;
+}
+
+IDFTOperator idft_operator_objf_2d(float dt, float dh, int M, int N)
+{
+  struct IDFTOperator d;
+
+  d.C_Tx = new std::complex<float>[N*N];
+  d.C_Tz_T = new std::complex<float>[M*M];
+
+  float df = 1.0f / (M*dt);
+  float dk = 1.0f / (N*dh);
+
+  #pragma omp parallel for schedule(static)
+  for (int f = 0; f < M; f++) {
+    for (int n = 0; n < M; n++) {
+      float w = 2.0f * M_PI * f*df;
+      float tau = (n - (float)M/2) * dt;
+      // 2iwtau
+      float angle = 2.0f * (w * tau);
+
+      d.C_Tz_T[n * M + f] =
+        std::exp(std::complex<float>(0.0f, angle));
+    }
+  }
+
+  #pragma omp parallel for schedule(static)
+  for (int x = 0; x < N; x++) {
+    for (int n = 0; n < N; n++) {
+      float w = 2.0f * M_PI * x*dk;
+      // 2iwk
+      float angle = 2.0f * (w * n*dh);
+
+      d.C_Tx[x * N + n] = 
+        std::exp(std::complex<float>(0.0f, angle));
+    }
+  }
+
+  return d;
+}
+
+IDFTOperator idft_operator_2d(float dt, float dh, int M, int N)
+{
+  struct IDFTOperator d;
+
+  d.C_Tx = new std::complex<float>[N*N];
+  d.C_Tz_T = new std::complex<float>[M*M];
+
+  float df = 1.0f / (M*dt);
+  float dk = 1.0f / (N*dh);
+
+  #pragma omp parallel for schedule(static)
+  for (int f = 0; f < M; f++) {
+    for (int n = 0; n < M; n++) {
+      float w = +2.0f * M_PI * f*df;
+      float angle = w * n*dt;
+
+      d.C_Tz_T[n * M + f] =
+        std::exp(std::complex<float>(0.0f, angle));
+    }
+  }
+
+  #pragma omp parallel for schedule(static)
+  for (int x = 0; x < N; x++) {
+    for (int n = 0; n < N; n++) {
+      float w = 2.0f * M_PI * x*dk;
+      float angle = w * n*dh;
+
+      d.C_Tx[x * N + n] = 
         std::exp(std::complex<float>(0.0f, angle));
     }
   }
@@ -100,20 +135,16 @@ std::complex<float>* computeDFT(int M, int N, float* f, const DFTOperator& d)
   return DFT;
 }
 
-float* computeIDFT(std::complex<float>* F, const DFTOperator& d, int M, int N)
+float* computeIDFT(std::complex<float>* F, const IDFTOperator& id, int M, int N)
 {
   // f = conj(Tz^T) * F * conj(Tx)
 
-  std::complex<float>* conj_TzT = conjugate2d(
-    transpose(d.Tz, M, M), M, M
-  );
-
   std::complex<float>* conj_TzT_F = 
-    mat_mult<std::complex<float>>(conj_TzT, F, M, M, M, N);
+    mat_mult<std::complex<float>>(id.C_Tz_T, F, M, M, M, N);
 
   std::complex<float>* conj_TzT_F_conj_Tx =
     mat_mult<std::complex<float>>(
-      conj_TzT_F, conjugate2d(d.Tx, N, N), M, N, N, N
+      conj_TzT_F, id.C_Tx, M, N, N, N
     );
 
   auto* IDFT = new float[M * N];

@@ -31,6 +31,24 @@ R* mat_mult(
   return result;
 }
 
+template<typename R, typename TA, typename TB>
+R* mat_mult_scalar(
+  const TA* A, const TB scalar,
+  int rowsA, int colsA
+)
+{
+  auto* result = new R[rowsA*colsA];
+  
+  #pragma omp parallel for schedule(static)
+  for (int i = 0; i < rowsA; i++) {
+    for (int j = 0; j < colsA; j++) {
+      result[i * colsA + j] *= scalar;
+    }
+  }
+
+  return result;
+}
+
 template<typename T>
 T* transpose(const T* A, int rowsA, int colsA)
 {

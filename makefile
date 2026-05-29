@@ -1,10 +1,10 @@
 FLAGS = -std=c++11 -Wall -fopenmp -mavx2 -mfma -O3 -march=native
 
-LIBS = -lfftw3f -lm
+LIBS = -lm
 
 MAIN = main.cpp
 
-SRCS = src/dft2d.cpp
+SRCS = src/dft2d.cpp src/objf.cpp
 
 run:
 	g++ $(FLAGS) $(MAIN) $(SRCS) -o run.out $(LIBS)
