@@ -1,17 +1,8 @@
 #include <cmath>
 #include <complex>
-#include <time.h>
-#include <assert.h>
 
 #include "../include/math_utils.h"
-#include "../include/IO.h"
-#include "../include/plot.h"
-
-struct DFTOperator
-{
-  std::complex<float>* Tx;
-  std::complex<float>* Tz;
-};
+#include "../include/dft2d.h"
 
 DFTOperator dft_operator_2d(int M, int N)
 {
@@ -47,7 +38,44 @@ DFTOperator dft_operator_2d(int M, int N)
   return d;
 }
 
-std::complex<float>* computeDFT(int M, int N, float* f, DFTOperator d)
+DFTOperator dft_operator_2d(float dt, float dh, int M, int N)
+{
+  /* T = \sum_{m=0}^{M-1} 
+  \sum_{n=0}^{N-1} e^{-j2\pi( \f  float* freqs_z = (float*)malloc(sizeof(float) * nt);
+  */
+
+  struct DFTOperator d;
+
+  d.Tx = new std::complex<float>[N*N];
+  d.Tz = new std::complex<float>[M*M];
+
+  float df = 1.0f / (M*dt);
+  float dk = 1.0f / (N*dh);
+
+  #pragma omp parallel for schedule(static)
+  for (int f = 0; f < M; f++) {
+    for (int n = 0; n < M; n++) {
+      float angle = -2.0f * M_PI * f*df * n*dt;
+
+      d.Tz[f * M + n] =
+        std::exp(std::complex<float>(0.0f, angle));
+    }
+  }
+
+  #pragma omp parallel for schedule(static)
+  for (int x = 0; x < N; x++) {
+    for (int n = 0; n < N; n++) {
+      float angle = -2.0f * M_PI * x*dk * n*dh;
+
+      d.Tx[x * N + n] = 
+        std::exp(std::complex<float>(0.0f, angle));
+    }
+  }
+
+  return d;
+}
+
+std::complex<float>* computeDFT(int M, int N, float* f, const DFTOperator& d)
 {
   // DFT = Tz * f * Tx^T
   
@@ -72,7 +100,7 @@ std::complex<float>* computeDFT(int M, int N, float* f, DFTOperator d)
   return DFT;
 }
 
-float* computeIDFT(std::complex<float>* F, DFTOperator d, int M, int N)
+float* computeIDFT(std::complex<float>* F, const DFTOperator& d, int M, int N)
 {
   // f = conj(Tz^T) * F * conj(Tx)
 
@@ -97,44 +125,4 @@ float* computeIDFT(std::complex<float>* F, DFTOperator d, int M, int N)
   return IDFT;
 }
 
-struct timespec start, end;
-
-int main()
-{
-  clock_gettime(CLOCK_MONOTONIC, &start);
-
-  const char* PATH = "data/seismogram_4001nt_113nrec.bin";
-
-  int nt = 4001;
-  int nrec = 113;
-
-  float* seismogram = read2d_fortran(PATH, nt, nrec);
-
-  DFTOperator T = dft_operator_2d(nt, nrec);
-
-  std::complex<float>* dft_seis = computeDFT(nt, nrec, seismogram, T);
-  float* idft_seis = computeIDFT(dft_seis, T, nt, nrec);
-
-  float* mag = magnitude(dft_seis, nt, nrec);
-
-  plot2d_imag(dft_seis, nrec, nt);
- 
-  write2d("data/seismogram_idft.bin", idft_seis, sizeof(float), nt, nrec);
-  write2d("data/seismogram_mag.bin", mag, sizeof(float), nt, nrec);
-
-  delete[] mag;
-  delete[] dft_seis;
-  delete[] idft_seis;
-  free(seismogram);
-
-  // ********************************** //
-  clock_gettime(CLOCK_MONOTONIC, &end);
-
-  double elapsed = (end.tv_sec - start.tv_sec)
-                  + (end.tv_nsec - start.tv_nsec) / 1e9;
-
-  printf("Elapsed: %.4f seconds\n", elapsed);
-
-  return 0;
-}
 

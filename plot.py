@@ -25,7 +25,7 @@ def plot_seismogram(
 
   fig, ax = plt.subplots(figsize=(10, 8))
 
-  img = ax.imshow(seismogram, aspect="auto", cmap="jet",
+  img = ax.imshow(seismogram, aspect="auto", cmap="Greys",
                     vmin=scale_min, vmax=scale_max)
 
   ax.set_yticks(tloc)
@@ -57,4 +57,5 @@ plt.colorbar()
 plt.tight_layout()
 plt.show()
 
-#plot_seismogram(seismogram_mag, nt, dt, offset, nrec)
+seismogram_idft = load("data/seismogram_idft.bin", nt, nrec)
+plot_seismogram(seismogram_idft, nt, dt, offset, nrec)
