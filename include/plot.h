@@ -137,6 +137,42 @@ static inline void plot2d(
   pclose(gnuplot);
 }
 
+static inline void plot2d_line_cols(
+  const float* arr,
+  int col,
+  int rows,
+  int cols
+)
+{
+  float* temp = (float*)malloc(sizeof(float) * rows);
+
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+      temp[i] = arr[i * cols + j];
+    }
+  }
+
+  plot1d(temp, rows);
+}
+
+static inline void plot2d_line_rows(
+  const float* arr,
+  int row,
+  int rows,
+  int cols
+)
+{
+  float* temp = (float*)malloc(sizeof(float) * cols);
+
+  for (int i = 0; i < cols; i++) {
+    for (int j = 0; j < rows; j++) {
+      temp[i] = arr[i * rows + j];
+    }
+  }
+
+  plot1d(temp, cols);
+}
+
 #include <complex>
 static inline void plot2d_imag(
     const std::complex<float>* arr,

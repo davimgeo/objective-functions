@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -39,14 +41,43 @@ def plot_seismogram(
 
   plt.show()
 
+t0 = 30
+
+if len(sys.argv) > 1:
+  t0 = int(sys.argv[1])
+
 nt, nrec = 2001, 40
 dt = 1e-3
 offset = 5
 
-c = load("data/c_2001x40.bin", nt, nrec)
+size = 101
 
-plt.plot(c[10, :])
+ref_alpha = 3
+
+alpha_min = 0.1
+alpha_max = 5
+
+alphas = np.linspace(alpha_min, alpha_max, size)
+idx = np.abs(alphas - ref_alpha).argmin()
+alphas[idx] = ref_alpha
+
+H_cor = np.fromfile(f"data/H_cor_size101_t0_{t0}.bin", dtype=np.float32, count=size)
+
+equation = r"$\sum_{\tau=0}^{nt} \; \sum_{n=0}^{nrec} (P(\tau)c(\tau, x))^2$"
+
+plt.figure(figsize=(6, 10))
+
+plt.plot(H_cor, alphas, label=fr"$t0 = {t0}$")
+
+#plt.title(f"Cross-correlation Objetive Function", fontsize=13)
+plt.xlabel(r"$\H_cor$", fontsize=13)
+plt.ylabel("alphas", fontsize=13)
+
+plt.tight_layout()
+plt.grid(True)
+plt.legend(fontsize=13)
+
+plt.savefig(f"H_cor_ref_alpha-{ref_alpha}.png", dpi=500)
+
 plt.show()
 
-plt.imshow(c, cmap="jet", aspect="auto")
-plt.show()

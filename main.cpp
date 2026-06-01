@@ -1,4 +1,5 @@
 #include <time.h>
+#include <stdio.h>
 
 #include "include/IO.h"
 #include "include/objf.h"
@@ -15,8 +16,9 @@
     printf("Elapsed: %.4f seconds\n", elapsed);           \
 } while (0)
 
-#define PATH_CALC "data/d_calc/Seismogram_2001nt_40nrec.bin"
-#define PATH_OBS "data/d_obs/seismogram_2001nt_40nrec_((250, 120))shot_33.bin"
+#define PATH_DCALC "data/d_calc/seismogram_2001nt_40nrec.bin"
+
+#define BUFFER_SIZE 256
 
 int main()
 {
@@ -28,19 +30,50 @@ int main()
   float dt = 1e-3;
   float dk = 5.0f;
 
-  float t0 = 500.0f;
+  float t0 = 15.0f;
 
-  float* d_calc = read2d_fortran(PATH_CALC, nt, nrec);
-  float* d_obs = read2d_fortran(PATH_OBS, nt, nrec);
+  int nshots = 101;
+  
+  float* d_calc = read2d_fortran(PATH_DCALC, nt, nrec);
+        
+  float* H_cor = (float*)malloc(sizeof(float) * nshots);
 
-  float H_cor = get_correlation_objf(d_calc, d_obs, dt, dk, nt, nrec, t0);
+  for (int i = 0; i < nshots; ++i)
+  {
+    char PATH_DOBS[BUFFER_SIZE];
 
-  printf("H_cor: %f\n", H_cor);
+    snprintf(
+        PATH_DOBS,
+        BUFFER_SIZE,
+        "data/d_obs/seismogram_2001nt_40nrec_((205, 108))shot_%d.bin",
+        i
+    );
 
+    float* d_obs = read2d_fortran(PATH_DOBS, nt, nrec);
+    
+    H_cor[i] = get_correlation_objf(
+        d_calc, d_obs, dt, dk, nt, nrec, t0
+    );
+    
+    printf("H_cor: %g, shot: %d\n", H_cor[i], i);
+
+    free(d_obs);
+  }
+      
   PROFILE_END();
 
+  char OUTPUT_PATH[BUFFER_SIZE];
+  snprintf(
+    OUTPUT_PATH,
+    BUFFER_SIZE,
+    "data/H_cor_size101_t0_%g.bin",
+    t0
+  );
+
+  write1d(OUTPUT_PATH, H_cor, sizeof(float), nshots);
+
   free(d_calc);
-  free(d_obs);
   
   return 0;
 }
+

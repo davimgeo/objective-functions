@@ -4,6 +4,8 @@
 #include "../include/dft2d.h"
 #include "../include/math_utils.h"
 
+#include "../include/plot.h"
+
 typedef std::complex<float> complex;
 
 static float* get_c(
@@ -51,30 +53,29 @@ static float* get_penalty(int nt, float t0)
 }
 
 float get_correlation_objf(
-    float *u_s, float *u_o,
-    float dt, float dk,
-    int nt, int nrec,
-    float t0
+  float *u_s, float *u_o,
+  float dt, float dk,
+  int nt, int nrec,
+  float t0
 )
 {
-  /*
-   * H_cor = 0.5 * \sum_
-   */
   float result = 0.0f;
 
   float* c = get_c(u_s, u_o, dt, dk, nt, nrec);
+  //plot2d(c, nrec, nt);
   float* P = get_penalty(nt, t0);
+  //plot1d(P, nt);
 
   for (int tau = 0; tau < nt; ++tau) {
 
-    for (int x = 0; x < nrec; ++x) {
+      for (int j = 0; j < nrec; ++j) {
 
-      int idx = tau * nrec + x;
+        int idx = tau * nrec + j;
 
-      float pc = P[tau] * c[idx];
+        float pc = P[tau] * c[idx];
 
-      result += pc * pc;
-    }
+        result += pc * pc;
+      }
   }
 
   delete[] c;
@@ -82,3 +83,4 @@ float get_correlation_objf(
 
   return 0.5f * result;
 }
+
