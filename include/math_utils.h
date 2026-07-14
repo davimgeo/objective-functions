@@ -80,6 +80,19 @@ static inline float* magnitude(
   return mag;
 }
 
+static inline std::complex<float>* conjugate1d(
+    const std::complex<float>* A, int size
+)
+{
+  auto* result = new std::complex<float>[size];
+
+  for (int i = 0; i < size; i++) {
+    result[i] = std::conj(A[i]);
+  }
+
+  return result;
+}
+
 static inline std::complex<float>* conjugate2d(
   const std::complex<float>* A, int rowsA, int colsA
 )
@@ -92,6 +105,23 @@ static inline std::complex<float>* conjugate2d(
   }
 
   return result;
+}
+
+static inline void normalize(float* result, int result_size)
+{
+  float min = result[0], max = result[0];
+  for (int i = 1; i < result_size; i++)
+  {
+    if (result[i] < min) min = result[i];
+    if (result[i] > max) max = result[i];
+  }
+
+  float range = max - min;
+  if (range > 0.0f)
+  {
+    for (int i = 0; i < result_size; i++)
+      result[i] = (result[i] - min) / range;
+  }
 }
 
 #endif // MATH_UTILS_H

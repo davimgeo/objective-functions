@@ -6,12 +6,6 @@
 
 #define PRINT(x) printf("%f ", x);
 
-typedef struct 
-{
-  std::complex<float>* DFT;
-  float* freq;
-} DFT;
-
 float* ricker(int nt, float dt, float fmax) 
 {
   float* ricker = new float[nt];
@@ -29,48 +23,65 @@ float* ricker(int nt, float dt, float fmax)
   return ricker;
 }
 
-DFT computeDFT(int N, float* arr, float dt)
+std::complex<float>* computeDFT(int N, float* arr, float dt)
 {
-  DFT d;
+  std::complex<float>* DFT = new std::complex<float>[N];
+  //d.freq = new float[N];
 
-  d.DFT = new std::complex<float>[N];
-  d.freq = new float[N];
+  //float f_s = 1.0f / dt;
 
-  float f_s = 1.0f / dt;
-
+  #pragma omp parallel for schedule(static)
   for(int k = 0; k < N; k++)
   {
-    d.DFT[k] = 0.0f;
+    DFT[k] = 0.0f;
 
-    d.freq[k] = k * f_s / N;
+    //d.freq[k] = k * f_s / N;
 
     for(int n = 0; n < N; n++)
     {
       float angle = -2.0f * M_PI * k * n / N;
 
-      d.DFT[k] += arr[n] *
+      DFT[k] += arr[n] *
               std::exp(std::complex<float>(0.0f, angle));
     }
   }
 
-  return d;
+  return DFT;
 }
 
-std::complex<float>* computeIFFT(int N, std::complex<float>* X)
+float* computeIFFT(int N, std::complex<float>* X)
 {
-  std::complex<float>* x = new std::complex<float>[N]; 
+  float* x = new float[N]; 
 
-  for(int n = 0; n < N; n++) {
+  #pragma omp parallel for schedule(static)
+  for(int n = 0; n < N; n++) 
+  {
     x[n] = 0.0f;
 
-    for(int k = 0; k < N; k++) {
+    for(int k = 0; k < N; k++) 
+    {
      
       float angle = 2.0f * M_PI * k * n / N;
-      x[n] += (X[k] * std::exp(std::complex<float>(0.0f, angle))) / std::complex<float>(N, 0.0f);
+
+      std::complex<float> arg = (X[k] * std::exp(std::complex<float>(0.0f, angle))) / 
+        std::complex<float>(N, 0.0f);
+      x[n] += arg.real();
     }
   }
 
   return x;
+}
+
+float* fftshift(float* x, int N)
+{
+    float* y = new float[N];
+
+    int shift = N / 2;
+
+    for(int i = 0; i < N; i++)
+        y[i] = x[(i + shift) % N];
+
+    return y;
 }
 
 float* magnitude(std::complex<float>* arr, const int SIZE)
@@ -84,6 +95,7 @@ float* magnitude(std::complex<float>* arr, const int SIZE)
   return arr_magnitude;
 }
 
+/*
 int main()
 {
   int SIZE = 1001;
@@ -95,19 +107,11 @@ int main()
 
   float* wavelet = ricker(SIZE, dt, fmax);
 
-  DFT d = computeDFT(SIZE, wavelet, dt);
+  std::complex<float>* d = computeDFT(SIZE, wavelet, dt);
    
-  float* dft_magnitude = magnitude(d.DFT, SIZE);
+  float* dft_magnitude = magnitude(d, SIZE);
 
-  std::complex<float>* ifft_wavelet = computeIFFT(SIZE, d.DFT);
-
-  float* recovered_wavelet  = new float[SIZE];
-
-  for(int i = 0; i < SIZE; i++) {
-    recovered_wavelet[i] = ifft_wavelet[i].real();
-  }
-
-  plot1d_2(wavelet, recovered_wavelet, SIZE);
+  float* ifft_wavelet = computeIFFT(SIZE, d);
 
   //write1d("output/recovered_wavelet.bin", recovered_wavelet, sizeof(float), SIZE);
   //write1d("output/ricker.bin", wavelet, sizeof(float), SIZE);
@@ -115,11 +119,10 @@ int main()
   //write1d("output/freq.bin", d.freq, sizeof(float), SIZE);
 
   delete[] ifft_wavelet;
-  delete[] recovered_wavelet;
   delete[] wavelet;
-  delete[] d.DFT;
-  delete[] d.freq;
+  delete[] d;
   delete[] dft_magnitude;
 
   return 0;
 }
+*/

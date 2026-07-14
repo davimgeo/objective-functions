@@ -8,7 +8,7 @@
 
 typedef std::complex<float> complex;
 
-static float* get_c(
+float* get_c(
   float* u_s, float* u_o,
   float dt, float dk,
   int nt, int nrec
@@ -35,7 +35,7 @@ static float* get_c(
   return computeIDFT(correlation, TI, nt, nrec);
 }
 
-static float* get_penalty(int nt, float t0)
+float* get_penalty(int nt, float t0)
 {
   float* P = new float[nt];
 
@@ -62,9 +62,7 @@ float get_correlation_objf(
   float result = 0.0f;
 
   float* c = get_c(u_s, u_o, dt, dk, nt, nrec);
-  //plot2d(c, nrec, nt);
   float* P = get_penalty(nt, t0);
-  //plot1d(P, nt);
 
   for (int tau = 0; tau < nt; ++tau) {
 

@@ -46,6 +46,7 @@ t0 = 30
 if len(sys.argv) > 1:
   t0 = int(sys.argv[1])
 
+"""
 nt, nrec = 2001, 40
 dt = 1e-3
 offset = 5
@@ -80,4 +81,21 @@ plt.legend(fontsize=13)
 plt.savefig(f"H_cor_ref_alpha-{ref_alpha}.png", dpi=500)
 
 plt.show()
+"""
+nt = 1001
 
+h_cor = np.fromfile("data/1d/h_cor.bin", dtype=np.float32, count=nt)
+l2 = np.fromfile("data/1d/l2.bin", dtype=np.float32, count=nt)
+l1 = np.fromfile("data/1d/l1.bin", dtype=np.float32, count=nt)
+
+fig, ax = plt.subplots(figsize=(10, 5))
+
+ax.plot(h_cor, label="h_cor")
+ax.plot(l2, label="l2")
+ax.plot(l1, label="l1")
+
+ax.grid(True)
+ax.legend(loc="upper right")
+
+plt.tight_layout()
+plt.show()
