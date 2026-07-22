@@ -2,9 +2,9 @@ FLAGS = -std=c++11 -Wall -fopenmp -mavx2 -mfma -O3 -march=native
 
 LIBS = -lm
 
-MAIN = src/objf1d.cpp
+MAIN = main1d.cpp
 
-SRCS = src/dft1d.cpp
+SRCS = src/1D/*.cpp
 
 run:
 	g++ $(FLAGS) $(MAIN) $(SRCS) -o run.out $(LIBS)

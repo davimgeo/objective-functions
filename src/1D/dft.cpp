@@ -1,11 +1,6 @@
 #include <cmath>
 #include <complex>
 
-#include "../include/IO.h"
-#include "../include/plot.h"
-
-#define PRINT(x) printf("%f ", x);
-
 float* ricker(int nt, float dt, float fmax) 
 {
   float* ricker = new float[nt];
