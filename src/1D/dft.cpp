@@ -1,23 +1,6 @@
 #include <cmath>
 #include <complex>
 
-float* ricker(int nt, float dt, float fmax) 
-{
-  float* ricker = new float[nt];
-  
-  float t0 = 2.0f * M_PI / fmax;
-  float fc = fmax / (3.0f*sqrtf(M_PI));
-
-  for (int i = 0; i < nt; i++) 
-  {
-    float t = (i * dt) - t0;
-    float arg = M_PI * (M_PI * M_PI * fc * fc * t * t);
-    ricker[i] = (1.0f - 2.0f * arg) * expf(-arg);
-  }
-
-  return ricker;
-}
-
 std::complex<float>* computeDFT(int N, float* arr, float dt)
 {
   std::complex<float>* DFT = new std::complex<float>[N];

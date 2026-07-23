@@ -13,13 +13,19 @@ int result_size
 );
 
 float* moving_rickers_cross(
-  float* wavelet,
+  float* u_o,
   int nt,
-  int result_size
+  int result_size,
+  float fmax,
+  float dt,
+  float t0
 );
 
 float* moving_rickers_decon(
-  float* wavelet,
+  float* u_o,
   int nt,
-  int result_size
+  int result_size,
+  float fmax,
+  float dt,
+  float t0
 );

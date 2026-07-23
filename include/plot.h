@@ -190,6 +190,36 @@ static inline void plot2d_imag(
   delete[] imag;
 }
 
+static inline void plot1d_imag(
+    const std::complex<float>* arr,
+    int size)
+{
+  float* imag = new float[size];
+
+  for (int i = 0; i < size; i++) {
+    imag[i] = arr[i].imag();
+  }
+
+  plot1d(imag, size);
+
+  delete[] imag;
+}
+
+static inline void plot1d_magnitude(
+    const std::complex<float>* arr,
+    int size)
+{
+  float* mag = new float[size];
+
+  for (int i = 0; i < size; i++) {
+    mag[i] = std::abs(arr[i]);
+  }
+
+  plot1d(mag, size);
+
+  delete[] mag;
+}
+
 static inline void plot2d_real(
     const std::complex<float>* arr,
     int width,

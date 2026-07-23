@@ -78,9 +78,12 @@ float* moving_rickers_l2(
 }
 
 float* moving_rickers_cross(
-  float* wavelet,
+  float* u_o,
   int nt,
-  int result_size
+  int result_size,
+  float fmax,
+  float dt,
+  float t0
 )
 {
   float* result = (float*)malloc(result_size * sizeof(float));
@@ -89,24 +92,24 @@ float* moving_rickers_cross(
 
   for (int i = 0; i < result_size; i++)
   {
-    float* ricker_phase = get_ricker(
+    float* u_s = get_ricker(
       nt,
-      30.0f,
-      1e-3f,
+      fmax,
+      dt,
       phase
     );
 
     result[i] = get_cross_result(
-      wavelet,
-      ricker_phase,
-      1e-3f,
+      u_s,
+      u_o,
+      dt,
       nt,
-      200
+      t0
     );
 
     phase += 0.7f / result_size;
 
-    free(ricker_phase);
+    free(u_s);
   }
 
   normalize(result, result_size);
@@ -115,9 +118,12 @@ float* moving_rickers_cross(
 }
 
 float* moving_rickers_decon(
-  float* wavelet,
+  float* u_o,
   int nt,
-  int result_size
+  int result_size,
+  float fmax,
+  float dt,
+  float t0
 )
 {
   float* result = (float*)malloc(result_size * sizeof(float));
@@ -126,24 +132,24 @@ float* moving_rickers_decon(
 
   for (int i = 0; i < result_size; i++)
   {
-    float* ricker_phase = get_ricker(
+    float* u_s = get_ricker(
       nt,
-      30.0f,
-      1e-3f,
+      fmax,
+      dt,
       phase
     );
 
     result[i] = get_decon_result(
-      wavelet,
-      ricker_phase,
-      1e-3f,
+      u_s,
+      u_o,
+      dt,
       nt,
-      200
+      t0
     );
 
     phase += 0.7f / result_size;
 
-    free(ricker_phase);
+    free(u_s);
   }
 
   normalize(result, result_size);

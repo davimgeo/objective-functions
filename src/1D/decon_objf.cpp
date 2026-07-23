@@ -3,7 +3,18 @@
 #include "../../include/1D/dft.h"
 #include "../../include/math_utils.h"
 
-#define EPSILON 1e-9f
+#include "../../include/plot.h"
+
+static float get_epsilon(std::complex<float>* arr, int size)
+{
+  float max = 0.0f;
+  for(int i = 0; i < size; i++) 
+  {
+    if (std::abs(arr[i]) > max) 
+      max = std::real(arr[i]);
+  }
+  return 0.001f * max;
+}
 
 static float* get_penalty(int nt, float dt, float t0)
 {
@@ -24,45 +35,45 @@ static float* get_penalty(int nt, float dt, float t0)
 }
 
 static float* get_d(
-  float* A, float* B,
+  float* u_s, float* u_o,
   float dt, int nt
 )
 {
-  // A = u_s; B = u_o
   // IFFT( (conj(A) * B) / (conj(A) * A + eps) )
   
-  std::complex<float>* C_u_o = conjugate1d(computeDFT(nt, B, dt), nt); 
-  std::complex<float>* u_o = computeDFT(nt, B, dt);
-  std::complex<float>* u_s = computeDFT(nt, A, dt);
+  std::complex<float>* C_u_o = conjugate1d(computeDFT(nt, u_o, dt), nt); 
+  std::complex<float>* Im_u_o = computeDFT(nt, u_o, dt);
+  std::complex<float>* Im_u_s = computeDFT(nt, u_s, dt);
 
   std::complex<float>* d = new std::complex<float>[nt];
+
+  float epsilon = get_epsilon(Im_u_o, nt);
   for (int i = 0; i < nt; i++)
   {
-    d[i] = (C_u_o[i] * u_s[i]) / ((C_u_o[i] * u_o[i]) + EPSILON);
+    d[i] = (C_u_o[i] * Im_u_s[i]) / ((C_u_o[i] * Im_u_o[i]) + epsilon);
   }
 
   return computeIFFT(nt, d);
 }
 
-static int initialized2 = 0;
+static int initialized = 0;
 
 float get_decon_result(
-  float *A, float *B,
+  float *u_s, float *u_o,
   float dt, int nt, float t0
 )
 {
-  // H_cor = 0.5 * sum(P(tau) * c)
   float result = 0.0f;
 
-  float* d = get_d(A, B, dt, nt);
+  float* d = get_d(u_s, u_o, dt, nt);
   float* d_shift = fftshift(d, nt);
   float* P = get_penalty(nt, dt, t0);
 
-  if(!initialized2)
+  if(!initialized)
   {
     //plot1d(P, nt);
-    //plot1d(c_shift, nt);
-    initialized2 = 1;
+    plot1d(d_shift, nt);
+    initialized = 1;
   }
 
   for (int tau = 0; tau < nt; ++tau) 
