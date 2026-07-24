@@ -50,7 +50,7 @@ float* computeIFFT(int N, std::complex<float>* X)
   return x;
 }
 
-float* fftshift(float* x, int N)
+float* dftshift(float* x, int N)
 {
     float* y = new float[N];
 
@@ -72,35 +72,3 @@ float* magnitude(std::complex<float>* arr, const int SIZE)
 
   return arr_magnitude;
 }
-
-/*
-int main()
-{
-  int SIZE = 1001;
-
-  float dt = 2e-3;
-  float fmax = 30.0f;
-
-  int* toninho = (int*)malloc(sizeof(int) * 4.0);
-
-  float* wavelet = ricker(SIZE, dt, fmax);
-
-  std::complex<float>* d = computeDFT(SIZE, wavelet, dt);
-   
-  float* dft_magnitude = magnitude(d, SIZE);
-
-  float* ifft_wavelet = computeIFFT(SIZE, d);
-
-  //write1d("output/recovered_wavelet.bin", recovered_wavelet, sizeof(float), SIZE);
-  //write1d("output/ricker.bin", wavelet, sizeof(float), SIZE);
-  //write1d("output/mag_ricker.bin", dft_magnitude, sizeof(float), SIZE);
-  //write1d("output/freq.bin", d.freq, sizeof(float), SIZE);
-
-  delete[] ifft_wavelet;
-  delete[] wavelet;
-  delete[] d;
-  delete[] dft_magnitude;
-
-  return 0;
-}
-*/

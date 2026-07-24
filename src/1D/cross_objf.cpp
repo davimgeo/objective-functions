@@ -1,8 +1,8 @@
 #include <cmath>
 #include <complex>
 
-#include "../../include/1D/dft.h"
-#include "../../include/math_utils.h"
+#include "1D/fft.h"
+#include "math_utils.h"
 
 static int initialized = 0;
 
@@ -31,14 +31,14 @@ static float* get_c(
 {
   // IFFT(conj(A) * B)
 
-  std::complex<float>* C_u_s = conjugate1d(computeDFT(nt, u_s, dt), nt); 
-  std::complex<float>* Im_u_o = computeDFT(nt, u_o, dt);
+  std::complex<float>* C_u_s = conjugate1d(get_fft(u_s, nt), nt); 
+  std::complex<float>* Im_u_o = get_fft(u_o, nt);
 
   // cross correlation
   std::complex<float>* cross = new std::complex<float>[nt];
   for (int i = 0; i < nt; i++) cross[i] = C_u_s[i] * Im_u_o[i];
 
-  return computeIFFT(nt, cross);
+  return get_ifft(cross, nt);
 }
 
 float get_cross_result(
@@ -62,7 +62,7 @@ float get_cross_result(
 
   for (int tau = 0; tau < nt; ++tau) 
   {
-    float pc = P[tau] * c_shift[tau];
+    float pc = P[tau] * c[tau];
 
     result += pc * pc;
   }
@@ -70,5 +70,5 @@ float get_cross_result(
   delete[] c;
   delete[] P;
 
-  return (0.5f * result);
+  return (-0.5f * result);
 }

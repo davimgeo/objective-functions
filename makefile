@@ -1,20 +1,22 @@
 FLAGS = -std=c++11 -Wall -fopenmp -mavx2 -mfma -O3 -march=native
+INCLUDE = -Iinclude
 
-LIBS = -lm
+LIBS = -lfftw3 -lm
 
-MAIN = main1d.cpp
+#MAIN = main1d.cpp
+MAIN = test.cpp
 
 SRCS = src/1D/*.cpp
 
 run:
-	g++ $(FLAGS) $(MAIN) $(SRCS) -o run.out $(LIBS)
+	g++ $(FLAGS) $(MAIN) $(INCLUDE) $(SRCS) -o run.out $(LIBS)
 	./run.out
 	$(MAKE) clean
 
 clean:
 	rm -f run.out
 
-plot:
+plott:
 	$(MAKE) run
 
-	python3 plot.py
+	python3 plot/plot_1d.py

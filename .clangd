@@ -1,0 +1,4 @@
+CompileFlags:
+  Add:
+    - -I/home/lum/coding_test/objective-functions/include
+    - -I/home/lum/coding_test/objective-functions/src

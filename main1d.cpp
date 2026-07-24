@@ -7,28 +7,30 @@
 
 #include "include/plot.h"
 
+struct timespec start, end;
+
 int main()
 {
+  clock_gettime(CLOCK_MONOTONIC, &start);
+
   int nt = 1001;
-  int result_size =200;
+  int result_size = 200;
 
   float fmax = 30.0f;
   float dt = 1e-3f;
 
-  float t0 = 500;
+  float t0 = 200;
 
   #if 1
-  float* ricker1 = get_ricker(nt, fmax, dt, 0.3f);
+  float* ricker1 = get_ricker(nt, fmax, dt, 0.6f);
   float* ricker2 = get_ricker(nt, fmax, dt, 0.05f);
 
   float* ricker = (float*)malloc(nt * sizeof(float));
   for(int t = 0; t < nt; t++) ricker[t] = ricker1[t] + ricker2[t];
 
-  write1d("data/ricker2.bin", ricker, sizeof(float), nt);
   #else
  
   float* ricker = get_ricker(nt, fmax, dt, 0.3f);
-  write1d("data/ricker.bin", ricker, sizeof(float), nt);
 
   #endif
 
@@ -47,4 +49,11 @@ int main()
   free(l1);
   free(l2);
   free(decon);
+
+  clock_gettime(CLOCK_MONOTONIC, &end);
+
+  double elapsed = (end.tv_sec - start.tv_sec)
+                  + (end.tv_nsec - start.tv_nsec) / 1e9;
+
+  printf("Elapsed: %.4f seconds\n", elapsed);
 }

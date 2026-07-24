@@ -1,7 +1,7 @@
 #include <complex>
 
-#include "../../include/1D/dft.h"
-#include "../../include/math_utils.h"
+#include "1D/fft.h"
+#include "math_utils.h"
 
 #include "../../include/plot.h"
 
@@ -41,9 +41,9 @@ static float* get_d(
 {
   // IFFT( (conj(A) * B) / (conj(A) * A + eps) )
   
-  std::complex<float>* C_u_o = conjugate1d(computeDFT(nt, u_o, dt), nt); 
-  std::complex<float>* Im_u_o = computeDFT(nt, u_o, dt);
-  std::complex<float>* Im_u_s = computeDFT(nt, u_s, dt);
+  std::complex<float>* C_u_o = conjugate1d(get_fft(u_o, nt), nt); 
+  std::complex<float>* Im_u_o = get_fft(u_o, nt);
+  std::complex<float>* Im_u_s = get_fft(u_s, nt);
 
   std::complex<float>* d = new std::complex<float>[nt];
 
@@ -53,7 +53,7 @@ static float* get_d(
     d[i] = (C_u_o[i] * Im_u_s[i]) / ((C_u_o[i] * Im_u_o[i]) + epsilon);
   }
 
-  return computeIFFT(nt, d);
+  return get_ifft(d, nt);
 }
 
 static int initialized = 0;
@@ -72,13 +72,13 @@ float get_decon_result(
   if(!initialized)
   {
     //plot1d(P, nt);
-    plot1d(d_shift, nt);
+    plot1d(d, nt);
     initialized = 1;
   }
 
   for (int tau = 0; tau < nt; ++tau) 
   {
-    float pc = P[tau] * d_shift[tau];
+    float pc = P[tau] * d[tau];
 
     result += pc * pc;
   }
@@ -86,5 +86,5 @@ float get_decon_result(
   delete[] d;
   delete[] P;
 
-  return (0.5f * result);
+  return (-0.5f * result);
 }
