@@ -3,8 +3,8 @@ INCLUDE = -Iinclude
 
 LIBS = -lfftw3 -lm
 
-#MAIN = main1d.cpp
-MAIN = test.cpp
+MAIN = main1d.cpp
+#MAIN = test.cpp
 
 SRCS = src/1D/*.cpp
 
@@ -16,7 +16,7 @@ run:
 clean:
 	rm -f run.out
 
-plott:
+plot:
 	$(MAKE) run
 
-	python3 plot/plot_1d.py
+	python3 plots/plot_1d.py

@@ -1,4 +1,4 @@
 CompileFlags:
   Add:
-    - -I/home/lum/coding_test/objective-functions/include
-    - -I/home/lum/coding_test/objective-functions/src
+    - -I/home/lum/coding/objective-functions/include
+    - -I/home/lum/coding/objective-functions/src

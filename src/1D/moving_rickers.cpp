@@ -1,11 +1,11 @@
 #include <stdlib.h>
 
-#include "../../include/math_utils.h"
+#include "utils.h"
 
-#include "../../include/1D/ricker.h"
-#include "../../include/1D/euclidian.h"
-#include "../../include/1D/cross.objf.h"
-#include "../../include/1D/decon_objf.h"
+#include "1D/ricker.h"
+#include "1D/euclidian.h"
+#include "1D/cross.objf.h"
+#include "1D/decon_objf.h"
 
 float* moving_rickers_l1(
   float* wavelet,

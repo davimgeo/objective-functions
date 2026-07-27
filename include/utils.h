@@ -1,9 +1,20 @@
-#ifndef MATH_UTILS_H
-#define MATH_UTILS_H
+#ifndef UTILS_H
+#define UTILS_H
 
 #include <cmath>
 #include <complex>
 #include <assert.h>
+
+#define PROFILE_BEGIN()                                   \
+    struct timespec start, end;                           \
+    clock_gettime(CLOCK_MONOTONIC, &start)                \
+
+#define PROFILE_END() do {                                \
+    clock_gettime(CLOCK_MONOTONIC, &end);                 \
+    double elapsed = (end.tv_sec - start.tv_sec) +        \
+                     (end.tv_nsec - start.tv_nsec) / 1e9; \
+    printf("Elapsed: %.4f seconds\n", elapsed);           \
+} while (0)
 
 template<typename R, typename TA, typename TB>
 R* mat_mult(

@@ -1,8 +1,8 @@
 #include <cmath>
 #include <complex>
 
-#include "../include/math_utils.h"
-#include "../include/dft2d.h"
+#include "utils.h"
+#include "2D/dft2d.h"
 
 DFTOperator dft_operator_2d(float dt, float dh, int M, int N)
 {

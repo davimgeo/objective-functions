@@ -2,7 +2,7 @@
 #include <complex>
 
 #include "1D/fft.h"
-#include "math_utils.h"
+#include "utils.h"
 
 static int initialized = 0;
 

@@ -1,8 +1,8 @@
 #include <complex>
 
-#include "../include/objf.h"
-#include "../include/dft2d.h"
-#include "../include/math_utils.h"
+//#include "2D/objf.h"
+#include "2D/dft2d.h"
+#include "utils.h"
 
 #include "../include/plot.h"
 

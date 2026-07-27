@@ -1,7 +1,7 @@
 #include <cmath>
 
-#include "../../include/math_utils.h"
-#include "../../include/1D/ricker.h"
+#include "utils.h"
+#include "1D/ricker.h"
 
 float l1_norm(float* A, float* B, int size)
 {
