@@ -32,7 +32,7 @@ static float* get_penalty(int nt, float dt, float t0)
     }
   }  
 
-  return P;
+  return fftshift(P, nt);
 }
 
 static float* get_d(
@@ -86,5 +86,5 @@ float get_decon_result(
   delete[] d;
   delete[] P;
 
-  return (-0.5f * result);
+  return (0.5f * result);
 }

@@ -37,10 +37,6 @@ int main()
       float* ricker = (float*)malloc(nt * sizeof(float));
       for(int t = 0; t < nt; t++) ricker[t] = ricker1[t] + ricker2[t];
 
-      char path[256];
-      snprintf(path, sizeof(path), "data/ricker_%d.bin", i);
-      write1d(path, ricker, sizeof(float), nt);
-
       float* cross = moving_rickers_cross(ricker, nt, result_size, fmax, dt, t0);
       float* l1    = moving_rickers_l1(ricker, nt, result_size);
       float* l2    = moving_rickers_l2(ricker, nt, result_size);
