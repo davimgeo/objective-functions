@@ -1,1 +1,3 @@
 data/*.bin
+data/1d/*.bin
+data/temp/*.bin
