@@ -1,17 +1,16 @@
 #include <stdlib.h>
 
 #include "include/IO.h"
+#include "utils.h"
 
 #include "include/1D/ricker.h"
 #include "include/1D/moving_rickers.h"
 
 #include "include/plot.h"
 
-struct timespec start, end;
-
 int main()
 {
-  clock_gettime(CLOCK_MONOTONIC, &start);
+  PROFILE_BEGIN();
 
   int nt = 1001;
   int result_size = 200;
@@ -50,10 +49,6 @@ int main()
   free(l2);
   free(decon);
 
-  clock_gettime(CLOCK_MONOTONIC, &end);
+  PROFILE_END();
 
-  double elapsed = (end.tv_sec - start.tv_sec)
-                  + (end.tv_nsec - start.tv_nsec) / 1e9;
-
-  printf("Elapsed: %.4f seconds\n", elapsed);
 }
