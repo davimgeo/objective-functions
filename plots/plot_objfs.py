@@ -63,6 +63,6 @@ l2 = load("data/temp/l2.bin", result_size, result_size)
 l1 = load("data/temp/l1.bin", result_size, result_size)
 decon = load("data/temp/decon.bin", result_size, result_size)
 
-plot_objf(decon, result_size, label="Deconvution", save=True)
+plot_objf(l1, result_size, label="Cross-Correlation", save=False)
 
 

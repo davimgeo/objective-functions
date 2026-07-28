@@ -3,7 +3,6 @@
 #include "1D/fft.h"
 #include "utils.h"
 
-#include "IO.h"
 #include "plot.h"
 
 static float get_epsilon(std::complex<float>*arr1, std::complex<float>*arr2, int size)
@@ -32,7 +31,7 @@ static float* get_penalty(int nt, float dt, float t0)
     }
   }  
 
-  return fftshift(P, nt);
+  return P;
 }
 
 static float* get_d(
@@ -86,5 +85,5 @@ float get_decon_result(
   delete[] d;
   delete[] P;
 
-  return (0.5f * result);
+  return (-0.5f * result);
 }

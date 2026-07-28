@@ -21,7 +21,7 @@ static float* get_penalty(int nt, float dt, float t0)
     }
   }  
 
-  return fftshift(P, nt);
+  return P;
 }
 
 static float* get_c(
@@ -69,5 +69,5 @@ float get_cross_result(
   delete[] c;
   delete[] P;
 
-  return (0.5f * result);
+  return (-0.5f * result);
 }
