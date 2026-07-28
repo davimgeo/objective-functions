@@ -13,7 +13,7 @@ fig, ax = plt.subplots(figsize=(10, 5))
 ax.plot(h_cor, label="Cross-correlation")
 ax.plot(l2, label="L2 Norm")
 ax.plot(l1, label="L1 Norm")
-#ax.plot(decon, label="Deconvolution")
+ax.plot(decon, label="Deconvolution")
 
 ax.grid(True)
 ax.legend(loc="upper right")

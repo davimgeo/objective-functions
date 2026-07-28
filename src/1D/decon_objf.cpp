@@ -3,17 +3,18 @@
 #include "1D/fft.h"
 #include "utils.h"
 
-#include "../../include/plot.h"
+#include "IO.h"
+#include "plot.h"
 
-static float get_epsilon(std::complex<float>* arr, int size)
+static float get_epsilon(std::complex<float>*arr1, std::complex<float>*arr2, int size)
 {
   float max = 0.0f;
   for(int i = 0; i < size; i++) 
   {
-    if (std::abs(arr[i]) > max) 
-      max = std::real(arr[i]);
+    float temp = std::abs(arr1[i] * arr2[i]);
+    if (temp > max) max = temp;
   }
-  return 0.001f * max;
+  return 0.01f * max;
 }
 
 static float* get_penalty(int nt, float dt, float t0)
@@ -47,7 +48,7 @@ static float* get_d(
 
   std::complex<float>* d = new std::complex<float>[nt];
 
-  float epsilon = get_epsilon(Im_u_o, nt);
+  float epsilon = get_epsilon(C_u_o, Im_u_o, nt);
   for (int i = 0; i < nt; i++)
   {
     d[i] = (C_u_o[i] * Im_u_s[i]) / ((C_u_o[i] * Im_u_o[i]) + epsilon);
@@ -66,13 +67,12 @@ float get_decon_result(
   float result = 0.0f;
 
   float* d = get_d(u_s, u_o, dt, nt);
-  float* d_shift = fftshift(d, nt);
   float* P = get_penalty(nt, dt, t0);
 
   if(!initialized)
   {
     //plot1d(P, nt);
-    plot1d(d, nt);
+    //plot1d(d, nt);
     initialized = 1;
   }
 

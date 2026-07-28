@@ -50,7 +50,6 @@ float get_cross_result(
   float result = 0.0f;
 
   float* c = get_c(u_s, u_o, dt, nt);
-  float* c_shift = fftshift(c, nt);
   float* P = get_penalty(nt, dt, t0);
 
   if(!initialized)

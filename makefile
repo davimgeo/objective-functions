@@ -3,8 +3,8 @@ INCLUDE = -Iinclude
 
 LIBS = -lfftw3 -lm
 
-MAIN = main1d.cpp
-#MAIN = test.cpp
+#MAIN = main1d.cpp
+MAIN = test.cpp
 
 SRCS = src/1D/*.cpp
 
