@@ -1,5 +1,5 @@
-#include <cmath>
-#include <complex>
+#include <complex.h>
+#include <stdlib.h>
 
 #include "1D/fft.h"
 #include "utils.h"
@@ -8,13 +8,13 @@ static int initialized = 0;
 
 static float* get_penalty(int nt, float dt, float t0)
 {
-  float* P = new float[nt];
+  float* P = (float*)malloc(nt * sizeof(float));
 
   for (int i = 0; i < nt; ++i) 
   {
     float tau = (i - (float)nt/2) * dt;
 
-    if(std::abs(tau) <= t0) {
+    if(fabs(tau) <= t0) {
       P[i] = tau;
     } else {
       P[i] = 0.0f;
@@ -24,27 +24,21 @@ static float* get_penalty(int nt, float dt, float t0)
   return P;
 }
 
-static float* get_c(
-  float* u_s, float* u_o,
-  float dt, int nt
-)
+static float* get_c(float* u_s, float* u_o, float dt, int nt)
 {
   // IFFT(conj(A) * B)
 
-  std::complex<float>* C_u_s = conjugate1d(get_fft(u_s, nt), nt); 
-  std::complex<float>* Im_u_o = get_fft(u_o, nt);
+  float complex* C_u_s = conjugate1d(get_fft(u_s, nt), nt); 
+  float complex* Im_u_o = get_fft(u_o, nt);
 
   // cross correlation
-  std::complex<float>* cross = new std::complex<float>[nt];
+  float complex* cross = malloc(sizeof(float complex) * nt);
   for (int i = 0; i < nt; i++) cross[i] = C_u_s[i] * Im_u_o[i];
 
   return get_ifft(cross, nt);
 }
 
-float get_cross_result(
-  float *u_s, float *u_o,
-  float dt, int nt, float t0
-)
+float get_cross_result(float *u_s, float *u_o, float dt, int nt, float t0)
 {
   // H_cor = 0.5 * sum(P(tau) * c)
   float result = 0.0f;
@@ -66,8 +60,7 @@ float get_cross_result(
     result += pc * pc;
   }
 
-  delete[] c;
-  delete[] P;
+  free(c); free(P);
 
   return (-0.5f * result);
 }

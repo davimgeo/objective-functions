@@ -1,16 +1,16 @@
-#include <complex>
+#include <complex.h>
 
 #include "1D/fft.h"
 #include "utils.h"
 
 #include "plot.h"
 
-static float get_epsilon(std::complex<float>*arr1, std::complex<float>*arr2, int size)
+static float get_epsilon(float complex*arr1, float complex*arr2, int size)
 {
   float max = 0.0f;
   for(int i = 0; i < size; i++) 
   {
-    float temp = std::abs(arr1[i] * arr2[i]);
+    float temp = cabsf(arr1[i] * arr2[i]);
     if (temp > max) max = temp;
   }
   return 0.01f * max;
@@ -18,13 +18,13 @@ static float get_epsilon(std::complex<float>*arr1, std::complex<float>*arr2, int
 
 static float* get_penalty(int nt, float dt, float t0)
 {
-  float* P = new float[nt];
+  float* P = (float*)malloc(nt * sizeof(float));
 
   for (int i = 0; i < nt; ++i) 
   {
     float tau = (i - (float)nt/2) * dt;
 
-    if(std::abs(tau) <= t0) {
+    if(fabs(tau) <= t0) {
       P[i] = tau;
     } else {
       P[i] = 0.0f;
@@ -41,11 +41,11 @@ static float* get_d(
 {
   // IFFT( (conj(A) * B) / (conj(A) * A + eps) )
   
-  std::complex<float>* C_u_o = conjugate1d(get_fft(u_o, nt), nt); 
-  std::complex<float>* Im_u_o = get_fft(u_o, nt);
-  std::complex<float>* Im_u_s = get_fft(u_s, nt);
+  float complex* C_u_o = conjugate1d(get_fft(u_o, nt), nt); 
+  float complex* Im_u_o = get_fft(u_o, nt);
+  float complex* Im_u_s = get_fft(u_s, nt);
 
-  std::complex<float>* d = new std::complex<float>[nt];
+  float complex* d = malloc(sizeof(float complex) * nt);
 
   float epsilon = get_epsilon(C_u_o, Im_u_o, nt);
   for (int i = 0; i < nt; i++)
@@ -82,8 +82,8 @@ float get_decon_result(
     result += pc * pc;
   }
 
-  delete[] d;
-  delete[] P;
+  free(d);
+  free(P);
 
   return (-0.5f * result);
 }

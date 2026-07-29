@@ -1,4 +1,5 @@
-#include <cmath>
+#include <math.h>
+#include <stdlib.h>
 
 #include "utils.h"
 #include "1D/ricker.h"

@@ -20,7 +20,7 @@ int main()
 
   float t0 = 200;
 
-  #if 1
+  #if 0
   float* ricker1 = get_ricker(nt, fmax, dt, 0.6f);
   float* ricker2 = get_ricker(nt, fmax, dt, 0.05f);
 

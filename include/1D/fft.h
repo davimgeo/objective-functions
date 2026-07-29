@@ -1,9 +1,9 @@
 #pragma once
 
-#include <complex>
+#include <complex.h>
 
-std::complex<float>* get_fft(float* arr, int N);
+float complex* get_fft(float* arr, int N);
 
-float* get_ifft(std::complex<float>* arr, int N);
+float* get_ifft(float complex* arr, int N);
 
 float* fftshift(float* x, int N);

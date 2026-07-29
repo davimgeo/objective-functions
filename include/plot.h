@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <complex.h>
+
 #ifdef _WIN32
     #define popen  _popen
     #define pclose _pclose
@@ -173,68 +175,62 @@ static inline void plot2d_line_rows(
   plot1d(temp, cols);
 }
 
-#include <complex>
 static inline void plot2d_imag(
-    const std::complex<float>* arr,
-    int width,
-    int height)
+  const float complex* arr,
+  int width,
+  int height)
 {
-  float* imag = new float[width * height];
+  float* imag = malloc(sizeof(float) * width * height);
 
-  for (int i = 0; i < width * height; i++) {
-    imag[i] = arr[i].imag();
-  }
+  for (int i = 0; i < width * height; i++)
+    imag[i] = cimagf(arr[i]);
 
   plot2d(imag, width, height);
 
-  delete[] imag;
+  free(imag);
 }
 
 static inline void plot1d_imag(
-    const std::complex<float>* arr,
-    int size)
+  const float complex* arr,
+  int size)
 {
-  float* imag = new float[size];
+  float* imag = malloc(sizeof(float) * size);
 
-  for (int i = 0; i < size; i++) {
-    imag[i] = arr[i].imag();
-  }
+  for (int i = 0; i < size; i++)
+    imag[i] = cimagf(arr[i]);
 
   plot1d(imag, size);
 
-  delete[] imag;
+  free(imag);
 }
 
 static inline void plot1d_magnitude(
-    const std::complex<float>* arr,
-    int size)
+  const float complex* arr,
+  int size)
 {
-  float* mag = new float[size];
+  float* mag = malloc(sizeof(float) * size);
 
-  for (int i = 0; i < size; i++) {
-    mag[i] = std::abs(arr[i]);
-  }
+  for (int i = 0; i < size; i++)
+    mag[i] = cabsf(arr[i]);
 
   plot1d(mag, size);
 
-  delete[] mag;
+  free(mag);
 }
 
 static inline void plot2d_real(
-    const std::complex<float>* arr,
-    int width,
-    int height)
+  const float complex* arr,
+  int width,
+  int height)
 {
-  float* real = new float[width * height];
+  float* real = malloc(sizeof(float) * width * height);
 
-  for (int i = 0; i < width * height; i++) {
-    real[i] = arr[i].real();
-  }
+  for (int i = 0; i < width * height; i++)
+    real[i] = crealf(arr[i]);
 
   plot2d(real, width, height);
 
-  delete[] real;
+  free(real);
 }
-
 #endif /* PLOT_H */
 

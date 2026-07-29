@@ -1,15 +1,15 @@
-FLAGS = -std=c++11 -Wall -fopenmp -mavx2 -mfma -O3 -march=native
+FLAGS = -std=c99 -Wall -fopenmp -mavx2 -mfma -O3 -march=native
 INCLUDE = -Iinclude
 
-LIBS = -lfftw3 -lm
+LIBS = -lfftw3f -lm
 
-#MAIN = main1d.cpp
-MAIN = test.cpp
+#MAIN = main1d.c
+MAIN = test.c
 
-SRCS = src/1D/*.cpp
+SRCS = src/1D/*.c
 
 run:
-	g++ $(FLAGS) $(MAIN) $(INCLUDE) $(SRCS) -o run.out $(LIBS)
+	gcc $(FLAGS) $(MAIN) $(INCLUDE) $(SRCS) -o run.out $(LIBS)
 	./run.out
 	$(MAKE) clean
 
