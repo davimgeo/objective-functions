@@ -1,0 +1,54 @@
+#ifndef GEOMETRY_H
+#define GEOMETRY_H
+
+#include <stdio.h>
+
+typedef struct
+{
+  float* x;
+  float* z;
+} receivers_t;
+
+typedef struct
+{
+  float* x;
+  float* z;
+} sources_t;
+
+typedef struct
+{
+  int line_length;
+  int src_depth;
+  int rec_depth;
+  int offset_rec;
+  int offset_src;
+} geometry_specs_t;
+
+typedef struct geometry_t
+{
+  receivers_t rec;
+  sources_t src;
+
+  int line_length;
+  int src_depth;
+  int rec_depth;
+  int offset_rec;
+  int offset_src;
+
+  size_t nrec, nsrc;
+} geometry_t;
+
+geometry_t* Geometry_InitLoad(geometry_t* g);
+
+geometry_t* Geometry_InitCreate(geometry_t* g, geometry_specs_t* specs);
+
+void Geometry_Load(
+  geometry_t* geom, 
+  const char* REC_PATH, 
+  const char* SRC_PATH
+);
+
+void Geometry_Create(geometry_t *geom);
+
+#endif /* end of include guard: GEOMETRY_H */
+
